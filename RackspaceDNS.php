@@ -10,21 +10,13 @@ class CloudDNS extends RackspaceApi
 	
 	public function lista($details = null)
 	{
-		$ep = 'servers';
-		$ep .= $details? '/detail' : ''; 
-		$response = self::request($ep);
-		$servers = $response['output']->servers;
-		
-		foreach($servers as $server){
-			self::detalles($server->id);
-		}
+	
 	}
 	
 	
 	public function detalles($server)
 	{
-		$detalles = self::request("servers/$server");
-		print_r($detalles['output']->server);
+		
 	}	
 	
 }

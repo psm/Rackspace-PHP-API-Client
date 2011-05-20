@@ -1,2 +1,4 @@
 #Pequeño cliente del API de Rackspace
 Por supuesto, nomás tengo esto acá para no perderlo después.
+
+Esto es una implementación muy básica que no sirve todavía para un carajo, pero será usada eventualmente para jugar con el DNS API al que puedo ó no tener acceso.

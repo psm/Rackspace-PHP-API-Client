@@ -13,18 +13,15 @@ class CloudServer extends RackspaceApi
 		$ep = 'servers';
 		$ep .= $details? '/detail' : ''; 
 		$response = self::request($ep);
-		$servers = $response['output']->servers;
 		
-		foreach($servers as $server){
-			self::detalles($server->id);
-		}
+		return $response->servers;
 	}
 	
 	
 	public function detalles($server)
 	{
 		$detalles = self::request("servers/$server");
-		print_r($detalles['output']->server);
+		return $detalles->server;
 	}	
 	
 }
