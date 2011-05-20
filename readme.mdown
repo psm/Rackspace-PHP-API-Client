@@ -1,0 +1,2 @@
+#Pequeño cliente del API de Rackspace
+Por supuesto, nomás tengo esto acá para no perderlo después.
