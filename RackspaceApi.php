@@ -57,10 +57,11 @@ class RackspaceApi
 		// Ni pedo, de regreso al viejo amigo file_get/put_contents 
 		if( file_exists(dirname(__FILE__).'/.rscache') ){
 			$token = unserialize(file_get_contents(dirname(__FILE__).'/.rscache'));
-			if( $token->since < time() ){ //nomás tenemos una hora, wemembew?
+			
+			if( time() < $token->since+(3600*24) ){ //nomás tenemos una hora, wemembew?
 				// Here be dragons:
 				$this->x->server = $token->x->server;
-				
+				$this->x->dns = "https://dns.api.rackspacecloud.com/v1.0/588796";
 				$this->token = $token->string;
 				self::header('X-Auth-Token', $this->token);
 				return true;
@@ -70,8 +71,10 @@ class RackspaceApi
 		//Agrega credenciales
 		self::header(array(
 			'X-Auth-User' => $this->user,
-			'X-Auth-Key', $this->key
+			'X-Auth-Key'=> $this->key
 		));
+		
+		//print_r($this->headers);
 		
 		//manda a llamar el request, sin verbo REST
 		self::request();
@@ -109,12 +112,13 @@ class RackspaceApi
 	protected function request($endpoint=false, $method = 'GET', $data=null)
 	{
 		$this->response = null;
+		$metod = strtoupper($method);
 		
 		if( $this->token ){
 			self::header('X-Auth-Token', $this->token);
 		}
 		
-		$endpoint = $endpoint? "/$endpoint.json" : '';
+		$endpoint = $endpoint? "/$endpoint" : '';
 		
 		//Bien importante, en cada driver tengo que settear el URL del endpoint, que usualmente tiene un ID
 		$url = "$this->base{$endpoint}";
@@ -126,21 +130,26 @@ class RackspaceApi
 		);
 		
 		$request = new HTTPRequest($url, constant("HTTP_METH_$method"), $options);
-		
 		if( $method!='GET' && $data!=null ){
 			$m = strtolower($method);
-			switch($m) {
-				case 'post':
-					$request->setRawPostData(json_encode($data));
-				break;
-				case 'put':
-					$request->setPutData(json_encode($data));
-				break;
+			
+			$request->addHeaders(array('Content-Type' => 'application/xml'));
+			
+			if($method=='POST'){
+				$request->addPostData($data);
 			}
+			if( $method=='PUT' ){
+				$request->addPutData($data);
+			}
+			
 		}
 		
 		try {
+			header('Content-type: text/plain');
 			$response = $request->send();
+			//print_r($request->getRawRequestMessage());
+			//echo "\n\n";
+			//print_r($response->toString());
 			$this->response->headers = $response->getHeaders();
 			$this->response->status = $response->getResponseCode();
 			$body = $response->getBody();
@@ -164,7 +173,7 @@ class RackspaceApi
 	 */
 	private function header($name, $content=null){
 		if( is_array($name) ){
-			array_merge($this->headers, $name);
+			$this->headers = array_merge($this->headers, $name);
 		} else {
 			$this->headers[$name] = urlencode($content);
 		}	
