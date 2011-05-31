@@ -61,7 +61,7 @@ class RackspaceApi
 			if( time() < $token->since+(3600*24) ){ //nomás tenemos una hora, wemembew?
 				// Here be dragons:
 				$this->x->server = $token->x->server;
-				$this->x->dns = "https://dns.api.rackspacecloud.com/v1.0/588796";
+				$this->x->dns = "https://dns.api.rackspacecloud.com/v1.0/00000"; //hasta que no regrese el token, se jdoe esto
 				$this->token = $token->string;
 				self::header('X-Auth-Token', $this->token);
 				return true;
@@ -74,7 +74,7 @@ class RackspaceApi
 			'X-Auth-Key'=> $this->key
 		));
 		
-		//print_r($this->headers);
+		print_r($this->headers);
 		
 		//manda a llamar el request, sin verbo REST
 		self::request();
@@ -112,7 +112,6 @@ class RackspaceApi
 	protected function request($endpoint=false, $method = 'GET', $data=null)
 	{
 		$this->response = null;
-		$metod = strtoupper($method);
 		
 		if( $this->token ){
 			self::header('X-Auth-Token', $this->token);
@@ -132,24 +131,16 @@ class RackspaceApi
 		$request = new HTTPRequest($url, constant("HTTP_METH_$method"), $options);
 		if( $method!='GET' && $data!=null ){
 			$m = strtolower($method);
-			
 			$request->addHeaders(array('Content-Type' => 'application/xml'));
-			
-			if($method=='POST'){
-				$request->addPostData($data);
-			}
-			if( $method=='PUT' ){
-				$request->addPutData($data);
-			}
-			
+			$request->addPutData($data);
 		}
 		
 		try {
 			header('Content-type: text/plain');
 			$response = $request->send();
-			//print_r($request->getRawRequestMessage());
-			//echo "\n\n";
-			//print_r($response->toString());
+			print_r($request->getRawRequestMessage());
+			echo "\n\n";
+			print_r($response->toString());
 			$this->response->headers = $response->getHeaders();
 			$this->response->status = $response->getResponseCode();
 			$body = $response->getBody();
